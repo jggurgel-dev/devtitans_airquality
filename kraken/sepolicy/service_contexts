@@ -1,0 +1,2 @@
+# Define o rótulo do serviço AIDL airquality
+devtitans.airquality.IAirQuality/default  u:object_r:airquality_service:s0

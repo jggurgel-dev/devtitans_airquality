@@ -1,0 +1,9 @@
+cc_binary {
+    name: "airquality_service_client",
+    srcs: ["airquality_service_client.cpp"],
+    vendor: true,
+    shared_libs: [
+        "libbinder_ndk",
+        "devtitans.airquality-V1-ndk",
+    ]
+}

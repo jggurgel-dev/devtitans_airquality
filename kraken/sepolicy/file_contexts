@@ -1,0 +1,2 @@
+# Define o rótulo do daemon airquality
+/vendor/bin/hw/devtitans.airquality-service  u:object_r:airquality_daemon_exec:s0

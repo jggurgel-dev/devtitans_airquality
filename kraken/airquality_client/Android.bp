@@ -1,0 +1,9 @@
+cc_binary {
+    name:         "airquality_client",
+    srcs:         [ "airquality_client.cpp" ],
+
+    shared_libs:  [ "airquality_lib" ],
+    required:     [ "airquality_lib" ],
+
+    vendor: true,
+}

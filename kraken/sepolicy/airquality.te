@@ -1,0 +1,28 @@
+# Cria o tipo/rótulo do serviço AIDL (rotulado no arquivo service_contexts)
+type airquality_service, service_manager_type, vendor_service;
+
+# Cria o tipo/rótulo do daemon (rotulado no arquivo file_contexts)
+type airquality_daemon, domain;
+type airquality_daemon_exec, exec_type, vendor_file_type, file_type;
+
+# Permissões
+init_daemon_domain(airquality_daemon);                        # O daemon será iniciado pelo init
+vndbinder_use(airquality_daemon);                             # O daemon usará o binder
+allow airquality_daemon servicemanager:binder { call transfer };
+
+add_service(airquality_daemon, airquality_service)             # O daemon irá criar o serviço do airquality 
+
+# Permite acesso aos arquivos do /sys
+allow airquality_daemon sysfs:file { getattr open read write };
+
+# Cria e Permite leitura da propriedades de sistema do airquality
+vendor_public_prop(vendor_airquality_prop)
+allow airquality_daemon vendor_airquality_prop:file { open getattr map read };
+
+# Permite que apps privilegiados acessem o daemon e o serviço
+allow platform_app airquality_daemon:binder call;
+allow platform_app airquality_service:service_manager find;
+
+# Permite que apps normais acessem o daemon e o serviço
+allow untrusted_app airquality_daemon:binder call;
+allow untrusted_app airquality_service:service_manager find;
