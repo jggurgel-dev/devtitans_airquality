@@ -11,7 +11,7 @@ MODULE_LICENSE("GPL");
 
 static int  usb_probe(struct usb_interface *ifce, const struct usb_device_id *id); // Executado quando o dispositivo é conectado na USB
 static void usb_disconnect(struct usb_interface *ifce);                            // Executado quando o dispositivo USB é desconectado da USB
-static int usb_send_cmd(char *cmd, int param);                                    // Envia um comando via USB e espera/retorna a resposta do dispositivo (int)
+static int  usb_send_cmd(char *cmd, int param);                                    // Envia um comando via USB e espera/retorna a resposta do dispositivo (int)
 // Executado quando o arquivo /sys/kernel/airquality/{led, ldr, threshold} é lido (e.g., cat /sys/kernel/airquality/led)
 static ssize_t attr_show(struct kobject *sys_obj, struct kobj_attribute *attr, char *buff);
 // Executado quando o arquivo /sys/kernel/airquality/{led, ldr, threshold} é escrito (e.g., echo "100" | sudo tee -a /sys/kernel/airquality/led)
@@ -23,10 +23,19 @@ static uint usb_in, usb_out;                       // Endereços das portas de e
 static char *usb_in_buffer, *usb_out_buffer;       // Buffers de entrada e saída da USB
 static int usb_max_size;                           // Tamanho máximo de uma mensagem USB
 
-// Variáveis para criar os arquivos no /sys/kernel/airquality/{pm25, pm10}
+// Variáveis para criar os arquivos no /sys/kernel/airquality/{led, ldr, threshold}
+/*static struct kobj_attribute  led_attribute = __ATTR(led, S_IRUGO | S_IWUSR, attr_show, attr_store);
+static struct kobj_attribute  ldr_attribute = __ATTR(ldr, S_IRUGO | S_IWUSR, attr_show, attr_store);
+static struct kobj_attribute  threshold_attribute = __ATTR(threshold, S_IRUGO | S_IWUSR, attr_show, attr_store);
+static struct attribute      *attrs[]       = { &led_attribute.attr, &ldr_attribute.attr, &threshold_attribute.attr, NULL };
+static struct attribute_group attr_group    = { .attrs = attrs };
+static struct kobject        *sys_obj;*/
+
 static struct kobj_attribute  pm25_attribute = __ATTR(pm25, S_IRUGO | S_IWUSR, attr_show, attr_store);
 static struct kobj_attribute  pm10_attribute = __ATTR(pm10, S_IRUGO | S_IWUSR, attr_show, attr_store);
-static struct attribute      *attrs[]       = { &pm25_attribute.attr, &pm10_attribute.attr, NULL };
+static struct kobj_attribute  dht_attribute = __ATTR(dht, S_IRUGO | S_IWUSR, attr_show, attr_store);
+static struct kobj_attribute  mq_attribute = __ATTR(mq, S_IRUGO | S_IWUSR, attr_show, attr_store);
+static struct attribute      *attrs[]       = { &pm25_attribute.attr, &pm10_attribute.attr, &dht_attribute.attr, &dht_attribute.attr, NULL };
 static struct attribute_group attr_group    = { .attrs = attrs };
 static struct kobject        *sys_obj;
 
@@ -77,8 +86,8 @@ static void usb_disconnect(struct usb_interface *interface) {
 }
 
 // Envia um comando via USB, espera e retorna a resposta do dispositivo (convertido para int)
-// Exemplo de Comando:  GET_PM25
-// Exemplo de Resposta: RES GET_PM25 13.60
+// Exemplo de Comando:  SET_LED 80
+// Exemplo de Resposta: RES SET_LED 1
 static int usb_send_cmd(char *cmd, int param) {
     int recv_size = 0;                      // Quantidade de caracteres no recv_line
     int ret, actual_size, i;
@@ -123,7 +132,7 @@ static int usb_send_cmd(char *cmd, int param) {
 
                     // Acessa a parte da resposta que contém o número e converte para inteiro
                     resp_pos = &recv_line[strlen(resp_expected) + 1];
-					ignore = kstrtol(resp_pos, 10, &resp_number); // AQUI
+                    ignore = kstrtol(resp_pos, 10, &resp_number);  // AQUI
 
                     return resp_number;
                 }
@@ -141,17 +150,31 @@ static int usb_send_cmd(char *cmd, int param) {
     return -1; // Não recebi a resposta esperada do dispositivo
 }
 
-// Executado quando o arquivo /sys/kernel/airquality/{pm25, pm10} é lido (e.g., cat /sys/kernel/airquality/pm25)
+// Executado quando o arquivo /sys/kernel/airquality/{led, ldr, threshold} é lido (e.g., cat /sys/kernel/airquality/led)
 static ssize_t attr_show(struct kobject *sys_obj, struct kobj_attribute *attr, char *buff) {
-	int value;
+    int value;
     const char *attr_name = attr->attr.name;
 
     printk(KERN_INFO "AirQuality: Lendo %s ...\n", attr_name);
 
+    /*if (!strcmp(attr_name, "led"))
+        value = usb_send_cmd("GET_LED", -1);
+    else if (!strcmp(attr_name, "ldr"))
+        value = usb_send_cmd("GET_LDR", -1);
+    else
+        value = usb_send_cmd("GET_THRESHOLD", -1);
+
+    sprintf(buff, "%d\n", value);                   // Cria a mensagem com o valor do led, ldr ou threshold
+    return strlen(buff);*/
+
     if (!strcmp(attr_name, "pm25"))
         value = usb_send_cmd("GET_PM25", -1);
-    else 
+    if (!strcmp(attr_name, "pm10")) 
         value = usb_send_cmd("GET_PM10", -1);
+    if (!strcmp(attr_name, "dht")) 
+        value = usb_send_cmd("GET_DHT", -1);
+    if (!strcmp(attr_name, "mq")) 
+        value = usb_send_cmd("GET_MQ", -1);
 //else
 //        value = usb_send_cmd("GET_THRESHOLD", -1);
 
@@ -159,25 +182,31 @@ static ssize_t attr_show(struct kobject *sys_obj, struct kobj_attribute *attr, c
     return strlen(buff);
 }
 
-// Executado quando o arquivo /sys/kernel/airquality/{pm25, pm10} é escrito (e.g., echo "100" | sudo tee -a /sys/kernel/airquality/pm)
+/*
+// Executado quando o arquivo /sys/kernel/airquality/{led, ldr, threshold} é escrito (e.g., echo "100" | sudo tee -a /sys/kernel/airquality/led)
 static ssize_t attr_store(struct kobject *sys_obj, struct kobj_attribute *attr, const char *buff, size_t count) {
-	long ret, value;
+    long ret, value;
     const char *attr_name = attr->attr.name;
 
-	ret = kstrtol(buff, 10, &value);
+    ret = kstrtol(buff, 10, &value);
     if (ret) {
         printk(KERN_ALERT "AirQuality: valor de %s invalido.\n", attr_name);
         return -EACCES;
     }
 
-    printk(KERN_INFO "AirQuality: Setando %s para %f ...\n", attr_name, value);
+    printk(KERN_INFO "AirQuality: Setando %s para %ld ...\n", attr_name, value);*/
 
+    /*if (!strcmp(attr_name, "led"))
+        ret = usb_send_cmd("SET_LED", value);
+    else if (!strcmp(attr_name, "threshold"))
+        ret = usb_send_cmd("SET_THRESHOLD", value);*/
+    /*    
     if (!strcmp(attr_name, "pm25"))
         ret = usb_send_cmd("SET_PM25", value);
     else if (!strcmp(attr_name, "pm10"))
         ret = usb_send_cmd("SET_PM10", value);
     else {
-        printk(KERN_ALERT "AirQuality: o valor do ldr (sensor de luz) eh apenas para leitura.\n");
+        printk(KERN_ALERT "AirQuality: o valor eh apenas para leitura.\n");
         return -EACCES;
     }
     if (ret < 0) {
@@ -186,4 +215,4 @@ static ssize_t attr_store(struct kobject *sys_obj, struct kobj_attribute *attr, 
     }
 
     return strlen(buff);
-}
+}*/

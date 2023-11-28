@@ -1,6 +1,3 @@
-obj-m += airquality.o
-PWD := $(CURDIR)
-
 all:
 	$(MAKE) -C $(KERNEL_SRC) M=$(M) modules $(KBUILD_OPTIONS)
 
