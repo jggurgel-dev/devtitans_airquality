@@ -4,11 +4,11 @@
 #include <string.h>               // Função strcmp
 #include <stdlib.h>               // Função atoi
 
-#include "airquality_lib.h"        // Classe AirQuality
+#include "airquality_lib.h"        // Classe Airquality
 
-namespace devtitans::airquality {  // Pacote que a classe abaixo pertence
+namespace devtitans::smartlamp {  // Pacote que a classe abaixo pertence
 
-class AirQualityClient {           // Classe
+class AirqualityClient {           // Classe
 
     public:
         void start(int argc, char **argv);
