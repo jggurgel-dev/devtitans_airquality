@@ -6,7 +6,7 @@
 
 #include "airquality_lib.h"        // Classe Airquality
 
-namespace devtitans::smartlamp {  // Pacote que a classe abaixo pertence
+namespace devtitans::airquality {  // Pacote que a classe abaixo pertence
 
 class AirqualityClient {           // Classe
 
