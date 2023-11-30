@@ -34,6 +34,8 @@ class AirQuality {
          */
         int getPM10();
         int getPM25();
+        int getDHT();
+        int getMQ();
         
         /**
          * Acessa o nível de luminosidade atual conforme reportado
@@ -75,6 +77,9 @@ class AirQuality {
          */
         int simPM10Value = 1180;
         int simPM25Value = 1950;
+        int simDHTValue = 1180;
+        int simMQValue = 1950;
+
 };
 
 } // namespace

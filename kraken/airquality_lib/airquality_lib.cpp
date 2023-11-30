@@ -28,6 +28,10 @@ int AirQuality::readFileValue(string file) {
             return this->simPM10Value;
         else if (file == "pm25")
             return this->simPM25Value;
+        else if (file == "dht")
+            return this->simDHTValue;
+        else if (file == "mq")
+            return this->simMQValue;
         else {
             // "ldr" (luminosity): Gera um número aleatório entre 0 e 100
             random_device dev;
@@ -88,6 +92,14 @@ int AirQuality::getPM10() {
 
 int AirQuality::getPM25() {
 	return this->readFileValue("pm25");
+}
+
+int AirQuality::getDHT() {
+	return this->readFileValue("dht");
+}
+
+int AirQuality::getMQ(){
+	return this->readFileValue("mq");
 }
 
 } // namespace
