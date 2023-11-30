@@ -3,9 +3,9 @@
 using namespace std;                                   // Permite usar string, ifstream diretamente ao invés de std::string
 using namespace android::base;                         // Permite usar GetBoolProperty ao invés de android::base::GetBoolProperty
 
-namespace devtitans::airquality{                       // Entra no pacote devtitans::airquality
+namespace devtitans::airquality {                       // Entra no pacote devtitans::airquality
 
-int AirQuality::connect() {
+int Airquality::connect() {
     char dirPath[] = "/sys/kernel/airquality";
     struct stat dirStat;
     if (stat(dirPath, &dirStat) == 0)
@@ -20,7 +20,7 @@ int AirQuality::connect() {
         return 2;                                      // Usando valores simulados
 }
 
-int AirQuality::readFileValue(string file) {
+int Airquality::readFileValue(string file) {
     int connected = this->connect();
 
     if (connected == 2) {                               // Usando valores simulados
@@ -57,34 +57,34 @@ int AirQuality::readFileValue(string file) {
     return -1;
 }
 
-//bool Smartlamp::writeFileValue(string file, int value) {
-//    int connected = this->connect();
-//
-//    if (connected == 2) {                                // Usando valores simulados
-//        if (file == "led") {
-//            this->simLedValue = value;
-//            return true;
-//        }
-//        else if (file == "threshold") {
-//            this->simThresholdValue = value;
-//            return true;
-//        }
-//    }
-//
-//    else if (connected == 1) {                          // Conectado. Vamos solicitar o valor ao dispositivo
-//        string filename = string("/sys/kernel/smartlamp/") + file;
-//        ofstream file(filename, ios::trunc);            // Abre o arquivo limpando o seu conteúdo
-//
-//        if (file.is_open()) {                           // Verifica se o arquivo foi aberto com sucesso
-//            file << value;                              // Escreve o ledValue no arquivo
-//            file.close();
-//            return true;
-//        }
-//    }
-//
-//    // Se chegou aqui, não foi possível conectar ou se comunicar com o dispositivo
-//    return false;
-//}
+bool Airquality::writeFileValue(string file, int value) {
+    int connected = this->connect();
+
+    if (connected == 2) {                                // Usando valores simulados
+        if (file == "led") {
+            this->simLedValue = value;
+            return true;
+        }
+        else if (file == "threshold") {
+            this->simThresholdValue = value;
+            return true;
+        }
+    }
+
+    else if (connected == 1) {                          // Conectado. Vamos solicitar o valor ao dispositivo
+        string filename = string("/sys/kernel/airquality/") + file;
+        ofstream file(filename, ios::trunc);            // Abre o arquivo limpando o seu conteúdo
+
+        if (file.is_open()) {                           // Verifica se o arquivo foi aberto com sucesso
+            file << value;                              // Escreve o ledValue no arquivo
+            file.close();
+            return true;
+        }
+    }
+
+    // Se chegou aqui, não foi possível conectar ou se comunicar com o dispositivo
+    return false;
+}
 
 int AirQuality::getPM10() {
     return this->readFileValue("pm10");
@@ -101,5 +101,6 @@ int AirQuality::getDHT() {
 int AirQuality::getMQ(){
 	return this->readFileValue("mq");
 }
+
 
 } // namespace
