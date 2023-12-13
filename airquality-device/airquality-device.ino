@@ -1,6 +1,6 @@
 #include "SdsDustSensor.h"
 
-float pm25, pm10;
+float pm25, pm10, dht, mq;
 
 SdsDustSensor sds(Serial2); 
 
@@ -10,10 +10,8 @@ void process_command(String command) {
 
     Serial.println("DBG Received command: " + command);
 
-    if (command == "GET_PM25") {
-      Serial.printf("RES GET_PM25 %d\n", (int) (pm25 * 100));
-    } else if (command == "GET_PM10") {
-      Serial.printf("RES GET_PM10 %d\n", (int) (pm10 * 100));
+    if (command == "GET_MEASURES") {
+      Serial.printf("RES GET_MEASURES %d\n %d\n %d\n %d\n", (int) (pm10 * 100), (int) (pm25 * 100), (int) (dht * 100), (int) (mq * 100);
     } else {
       Serial.println("ERR Unknown command");
     }
@@ -42,6 +40,8 @@ void setup() {
 
     pm25 = -1;
     pm10 = -1;
+    dht = -1;
+    mq = -1;
 
     Serial.println("DBG AirQuality Initialized.");
 }
@@ -68,6 +68,8 @@ void loop() {
         Serial.println(pm.statusToString());
     }
 
+    /* inserir leitura do dht e mq aqui */
+    
     WorkingStateResult state = sds.sleep();
     if (state.isWorking()) {
         Serial.println("Problem with sleeping the sensor");
