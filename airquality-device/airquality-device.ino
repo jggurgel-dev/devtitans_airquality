@@ -11,7 +11,7 @@ void process_command(String command) {
     Serial.println("DBG Received command: " + command);
 
     if (command == "GET_MEASURES") {
-      Serial.printf("RES GET_MEASURES %d\n %d\n %d\n %d\n", (int) (pm10 * 100), (int) (pm25 * 100), (int) (dht * 100), (int) (mq * 100);
+      Serial.printf("RES GET_MEASURES \n%d\n%d\n%d\n%d\n", (int) (pm10 * 100), (int) (pm25 * 100), (int) (dht * 100), (int) (mq * 100));
     } else {
       Serial.println("ERR Unknown command");
     }

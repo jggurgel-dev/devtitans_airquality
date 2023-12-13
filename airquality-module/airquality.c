@@ -31,10 +31,7 @@ static struct attribute      *attrs[]       = { &led_attribute.attr, &ldr_attrib
 static struct attribute_group attr_group    = { .attrs = attrs };
 static struct kobject        *sys_obj;*/
 
-static struct kobj_attribute  pm25_attribute = __ATTR(pm25, S_IRUGO | S_IWUSR, attr_show, attr_store);
-static struct kobj_attribute  pm10_attribute = __ATTR(pm10, S_IRUGO | S_IWUSR, attr_show, attr_store);
-static struct kobj_attribute  dht_attribute = __ATTR(dht, S_IRUGO | S_IWUSR, attr_show, attr_store);
-static struct kobj_attribute  mq_attribute = __ATTR(mq, S_IRUGO | S_IWUSR, attr_show, attr_store);
+static struct kobj_attribute  measures_attribute = __ATTR(pm25, S_IRUGO | S_IWUSR, attr_show, attr_store);
 static struct attribute      *attrs[]       = { &pm25_attribute.attr, &pm10_attribute.attr, &dht_attribute.attr, &mq_attribute.attr, NULL };
 static struct attribute_group attr_group    = { .attrs = attrs };
 static struct kobject        *sys_obj;
@@ -167,14 +164,8 @@ static ssize_t attr_show(struct kobject *sys_obj, struct kobj_attribute *attr, c
     sprintf(buff, "%d\n", value);                   // Cria a mensagem com o valor do led, ldr ou threshold
     return strlen(buff);*/
 
-    if (!strcmp(attr_name, "pm25"))
-        value = usb_send_cmd("GET_PM25", -1);
-    if (!strcmp(attr_name, "pm10")) 
-        value = usb_send_cmd("GET_PM10", -1);
-    if (!strcmp(attr_name, "dht")) 
-        value = usb_send_cmd("GET_DHT", -1);
-    if (!strcmp(attr_name, "mq")) 
-        value = usb_send_cmd("GET_MQ", -1);
+    if (!strcmp(attr_name, "measures"))
+        value = usb_send_cmd("GET_MEASURES", -1);
 //else
 //        value = usb_send_cmd("GET_THRESHOLD", -1);
 
@@ -203,13 +194,7 @@ static ssize_t attr_store(struct kobject *sys_obj, struct kobj_attribute *attr, 
     printk(KERN_INFO "AirQuality: Setando %s para %ld ...\n", attr_name, value);*/
 
     if (!strcmp(attr_name, "led"))
-        ret = usb_send_cmd("SET_LED", value);
-    else if (!strcmp(attr_name, "threshold"))
-        ret = usb_send_cmd("SET_THRESHOLD", value);
-    if (!strcmp(attr_name, "pm25"))
-        ret = usb_send_cmd("SET_PM25", value);
-    else if (!strcmp(attr_name, "pm10"))
-        ret = usb_send_cmd("SET_PM10", value);
+        ret = usb_send_cmd("SET_MEASURES", value);
     else {
         printk(KERN_ALERT "AirQuality: o valor eh apenas para leitura.\n");
         return -EACCES;
