@@ -1,5 +1,6 @@
 #include "SdsDustSensor.h"
 #include "MQ2.h"
+#include "DHT.h"
 
 float pm25, pm10;
 float lpg, co, smoke;
@@ -7,6 +8,10 @@ float tmp, hum;
 
 int pin_mq2 = 15;
 MQ2 mq2(pin_mq2);
+
+#define DHTPIN 2     // Digital pin connected to the DHT sensor
+#define DHTTYPE DHT11   // DHT 11
+DHT dht(DHTPIN, DHTTYPE);
 
 SdsDustSensor sds(Serial2); 
 
@@ -47,6 +52,8 @@ void setup() {
     sds.begin(); // this line will begin Serial1 with given baud rate (9600 by default)
 
     mq2.begin();
+
+    dht.begin();
 
     Serial.println(sds.queryFirmwareVersion().toString()); // prints firmware version
     Serial.println(sds.setQueryReportingMode().toString()); // ensures sensor is in 'query' reporting mode
@@ -89,6 +96,8 @@ void loop() {
     lpg = mq2.readLPG();
     co = mq2.readCO();
     smoke = mq2.readSmoke();
+    tmp = dht.readTemperature();
+    hum = dht.readHumidity();
     
     WorkingStateResult state = sds.sleep();
     if (state.isWorking()) {
