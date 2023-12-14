@@ -1,6 +1,12 @@
 #include "SdsDustSensor.h"
+#include "MQ2.h"
 
-float pm25, pm10, dht, mq;
+float pm25, pm10;
+float lpg, co, smoke;
+float tmp, hum;
+
+int pin_mq2 = 15;
+MQ2 mq2(pin_mq2);
 
 SdsDustSensor sds(Serial2); 
 
@@ -11,7 +17,13 @@ void process_command(String command) {
     Serial.println("DBG Received command: " + command);
 
     if (command == "GET_MEASURES") {
-      Serial.printf("RES GET_MEASURES \n%d\n%d\n%d\n%d\n", (int) (pm10 * 100), (int) (pm25 * 100), (int) (dht * 100), (int) (mq * 100));
+      Serial.printf("RES GET_MEASURES %d %d %d %d %d %d \n", (int) (pm10 * 100),
+                                                             (int) (pm25 * 100),
+                                                             (int) (lpg * 100000),
+                                                             (int) (co * 100000),
+                                                             (int) (smoke * 100000),
+                                                             (int) (tmp * 100),
+                                                             (int) (hum * 100));
     } else {
       Serial.println("ERR Unknown command");
     }
@@ -34,14 +46,18 @@ void setup() {
     Serial.begin(9600);
     sds.begin(); // this line will begin Serial1 with given baud rate (9600 by default)
 
+    mq2.begin();
+
     Serial.println(sds.queryFirmwareVersion().toString()); // prints firmware version
     Serial.println(sds.setQueryReportingMode().toString()); // ensures sensor is in 'query' reporting mode
     Serial.println(sds.setCustomWorkingPeriod(5).toString()); // ensures sensor is in 'query' reporting mode
 
     pm25 = -1;
     pm10 = -1;
-    dht = -1;
-    mq = -1;
+    lpg = -1;
+    co = -1;
+    smoke = -1;
+    hum = -1;
 
     Serial.println("DBG AirQuality Initialized.");
 }
@@ -69,6 +85,10 @@ void loop() {
     }
 
     /* inserir leitura do dht e mq aqui */
+    mq2.read(true);
+    lpg = mq2.readLPG();
+    co = mq2.readCO();
+    smoke = mq2.readSmoke();
     
     WorkingStateResult state = sds.sleep();
     if (state.isWorking()) {

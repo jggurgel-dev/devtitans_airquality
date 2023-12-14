@@ -11,7 +11,7 @@ AirQualitySensor::AirQualitySensor (int32_t sensorHandle, ISensorsEventCallback*
 }
 
 std::vector AirQualitySensor::readEvents() {
-    std::ifstream in("/sys/kernel/airquality/pm10"); // open sysfs file to read sensor read
+    std::ifstream in("/sys/kernel/airquality/measures"); // open sysfs file to read sensor read
 
     std::vector<Event> events;
 
