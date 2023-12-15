@@ -9,7 +9,7 @@ void AirqualityClient::start(int argc, char **argv) {
 
     if (argc < 2) {
         cout << "Sintaxe: " << argv[0] << "  " << endl;
-        cout << "    Comandos: get-pm10, get-pm25, get-dht, get-mq" << endl;
+        cout << "    Comandos: get-pm10, get-pm25, get-ldr, get-co, get-smoke, get-tmp, get-hum" << endl;
         exit(1);
     }
 
@@ -21,13 +21,21 @@ void AirqualityClient::start(int argc, char **argv) {
     else if (!strcmp(argv[1], "get-pm25")) {
         cout << "Valor de PM25: " << airquality.getPM25() << endl;
     }
-    else if (!strcmp(argv[1], "get-dht")) {
-        cout << "Valor de Umidade: " << airquality.getDHT() << endl;
+    else if (!strcmp(argv[1], "get-ldr")) {
+        cout << "Valor de Umidade: " << airquality.getLDR() << endl;
     }
-    else if (!strcmp(argv[1], "get-mq")) {
-        cout << "Valor de Gás: " << airquality.getMQ() << endl;
+    else if (!strcmp(argv[1], "get-co")) {
+        cout << "Valor de Gás: " << airquality.getCO() << endl;
     }
-
+    else if (!strcmp(argv[1], "get-smoke")) {
+        cout << "Valor de Gás: " << airquality.getSMOKE() << endl;
+    }
+    else if (!strcmp(argv[1], "get-tmp")) {
+        cout << "Valor de Gás: " << airquality.getTMP() << endl;
+    }
+    else if (!strcmp(argv[1], "get-hum")) {
+        cout << "Valor de Gás: " << airquality.getHUM() << endl;
+    }
     else {
         cout << "Comando inválido." << endl;
         exit(1);
