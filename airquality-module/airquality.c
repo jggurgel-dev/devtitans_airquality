@@ -31,7 +31,7 @@ static struct attribute      *attrs[]       = { &led_attribute.attr, &ldr_attrib
 static struct attribute_group attr_group    = { .attrs = attrs };
 static struct kobject        *sys_obj;*/
 
-static struct kobj_attribute  measures_attribute = __ATTR(pm25, S_IRUGO | S_IWUSR, attr_show, attr_store);
+static struct kobj_attribute  measures_attribute = __ATTR(measures, S_IRUGO | S_IWUSR, attr_show, attr_store);
 static struct attribute      *attrs[]       = { &measures_attribute.attr, NULL };
 static struct attribute_group attr_group    = { .attrs = attrs };
 static struct kobject        *sys_obj;
@@ -191,7 +191,7 @@ static ssize_t attr_store(struct kobject *sys_obj, struct kobj_attribute *attr, 
     else if (!strcmp(attr_name, "threshold"))
         ret = usb_send_cmd("SET_THRESHOLD", value);
     
-    printk(KERN_INFO "AirQuality: Setando %s para %ld ...\n", attr_name, value);*/
+    printk(KERN_INFO "AirQuality: Setando %s para %ld ...\n", attr_name, value);
 
     if (!strcmp(attr_name, "led"))
         ret = usb_send_cmd("SET_MEASURES", value);
