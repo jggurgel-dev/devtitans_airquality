@@ -32,7 +32,7 @@ static struct attribute_group attr_group    = { .attrs = attrs };
 static struct kobject        *sys_obj;*/
 
 static struct kobj_attribute  measures_attribute = __ATTR(pm25, S_IRUGO | S_IWUSR, attr_show, attr_store);
-static struct attribute      *attrs[]       = { &pm25_attribute.attr, &pm10_attribute.attr, &dht_attribute.attr, &mq_attribute.attr, NULL };
+static struct attribute      *attrs[]       = { &measures_attribute.attr, NULL };
 static struct attribute_group attr_group    = { .attrs = attrs };
 static struct kobject        *sys_obj;
 
