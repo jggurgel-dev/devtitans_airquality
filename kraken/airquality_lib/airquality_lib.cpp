@@ -1,7 +1,5 @@
 #include "airquality_lib.h"
 
-enum Measure {PM10, PM25, LPG, CO, SMOKE, TMP, HUM}}
-
 using namespace std;                                   // Permite usar string, ifstream diretamente ao invés de std::string
 using namespace android::base;                         // Permite usar GetBoolProperty ao invés de android::base::GetBoolProperty
 
@@ -22,24 +20,18 @@ int AirQuality::connect() {
         return 2;                                      // Usando valores simulados
 }
 
-int AirQuality::readFileValue(Measure measure) {
+int AirQuality::readFileValue(string file) {
     int connected = this->connect();
 
     if (connected == 2) {                               // Usando valores simulados
-        if (measure == PM10)
+        if (file == "pm10")
             return this->simPM10Value;
-        else if (measure == PM25)
+        else if (file == "pm25")
             return this->simPM25Value;
-        else if (measure == LPG)
-            return this->simLPGValue;
-        else if (measure == CO)
-            return this->simCOValue;
-        else if (measure == SMOKE)
-            return this->simSMOKEValue;
-        else if (measure == TMP)
-            return this->simTMPValue;
-        else if (measure == HUM)
-            return this->simHUMValue;
+        else if (file == "dht")
+            return this->simDHTValue;
+        else if (file == "mq")
+            return this->simMQValue;
         else {
             // "ldr" (luminosity): Gera um número aleatório entre 0 e 100
             random_device dev;
@@ -50,21 +42,30 @@ int AirQuality::readFileValue(Measure measure) {
     }
 
     else if (connected == 1) {                          // Conectado. Vamos solicitar o valor ao dispositivo
-        int value;
+        int pm10, pm25, lpg, co, smoke, tmp, hum;
         string filename = string("/sys/kernel/airquality/measures");
-
-	std::vector<int> vec_measures;
-	
         ifstream file(filename);                        // Abre o arquivo do módulo do kernel
 
         if (file.is_open()) {                           // Verifica se o arquivo foi aberto com sucesso
-		while (std::getline(file, word, ' ')) {
-			vec_measures.push(atoi(word.c_str());
-	        }
-		file.close();
-    	}
+            file >> pm10 >> pm25 >> lpg >> co >> smoke >> tmp >> hum;                     // Lê um inteiro do arquivo
+            file.close();
 
-	return vec_measures.index(measure);
+            if (file == "pm10")
+                return pm10;
+            else if (file == "pm25")
+                return pm25;
+            else if (file == "lpg")
+                return lpg;
+            else if (file == "co")
+                return co;
+            else if (file == "smoke")
+                return smoke;
+            else if (file == "tmp")
+                return tmp;
+            else if (file == "hum")
+                return hum;
+        }
+    }
 
     // Se chegou aqui, não foi possível conectar ou se comunicar com o dispositivo
     return -1;
@@ -100,31 +101,31 @@ int AirQuality::readFileValue(Measure measure) {
 //}
 
 int AirQuality::getPM10() {
-    return this->readFileValue(PM10);
+    return this->readFileValue("pm10");
 }
 
 int AirQuality::getPM25() {
-	return this->readFileValue(PM25);
+	return this->readFileValue("pm25");
 }
 
 int AirQuality::getLPG() {
-	return this->readFileValue(LPG);
+	return this->readFileValue("lpg");
 }
 
 int AirQuality::getCO(){
-	return this->readFileValue(CO);
+	return this->readFileValue("co");
 }
 
-int AirQuality::getSMOKE(){
-	return this->readFileValue(SMOKE);
+int AirQuality::getSMOKE() {
+	return this->readFileValue("smoke");
 }
 
-int AirQuality::getTMP(){
-	return this->readFileValue(TMP);
+int AirQuality::getTMP() {
+	return this->readFileValue("tmp");
 }
 
 int AirQuality::getHUM(){
-	return this->readFileValue(HUM);
+	return this->readFileValue("hum");
 }
 
 } // namespace
