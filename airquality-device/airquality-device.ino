@@ -22,7 +22,7 @@ void process_command(String command) {
     Serial.println("DBG Received command: " + command);
 
     if (command == "GET_MEASURES") {
-      Serial.printf("RES GET_MEASURES %d %d %d %d %d %d \n", (int) (pm10 * 100),
+      Serial.printf("RES GET_MEASURES %d %d %d %d %d %d %d \n", (int) (pm10 * 100),
                                                              (int) (pm25 * 100),
                                                              (int) (lpg * 100000),
                                                              (int) (co * 100000),
@@ -64,6 +64,7 @@ void setup() {
     lpg = -1;
     co = -1;
     smoke = -1;
+    tmp = -1;
     hum = -1;
 
     Serial.println("DBG AirQuality Initialized.");
