@@ -5,6 +5,11 @@
 #include <sys/stat.h>                  // Função e struct stat
 #include <random>                      // Geração de números aleatórios (valores simulados)
 
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
 using namespace std;                   // Permite usar string diretamente ao invés de std::string
 
 namespace devtitans::airquality{       // Pacote AirQuality
@@ -35,7 +40,11 @@ class AirQuality {
         int getPM10();
         int getPM25();
         int getDHT();
-        int getMQ();
+        int getLPG();
+        int getCO();
+        int getSMOKE();
+        int getTMP();
+        int getHUM();
         
         /**
          * Acessa o nível de luminosidade atual conforme reportado
@@ -77,8 +86,11 @@ class AirQuality {
          */
         int simPM10Value = 1180;
         int simPM25Value = 1950;
-        int simDHTValue = 1180;
-        int simMQValue = 1950;
+        int simLDRValue = 1180;
+        int simCOValue = 1950;
+        int simSMOKEValue = 1950;
+        int simTMPValue = 1950;
+        int simHUMValue = 1950;
 
 };
 
