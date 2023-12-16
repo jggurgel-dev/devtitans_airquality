@@ -11,7 +11,7 @@ MODULE_LICENSE("GPL");
 
 static int  usb_probe(struct usb_interface *ifce, const struct usb_device_id *id); // Executado quando o dispositivo é conectado na USB
 static void usb_disconnect(struct usb_interface *ifce);                            // Executado quando o dispositivo USB é desconectado da USB
-static int  usb_send_cmd(char *cmd, int param);                                    // Envia um comando via USB e espera/retorna a resposta do dispositivo (int)
+static char *  usb_send_cmd(char *cmd, int param);                                    // Envia um comando via USB e espera/retorna a resposta do dispositivo (int)
 // Executado quando o arquivo /sys/kernel/airquality/{led, ldr, threshold} é lido (e.g., cat /sys/kernel/airquality/led)
 static ssize_t attr_show(struct kobject *sys_obj, struct kobj_attribute *attr, char *buff);
 // Executado quando o arquivo /sys/kernel/airquality/{led, ldr, threshold} é escrito (e.g., echo "100" | sudo tee -a /sys/kernel/airquality/led)
@@ -85,13 +85,13 @@ static void usb_disconnect(struct usb_interface *interface) {
 // Envia um comando via USB, espera e retorna a resposta do dispositivo (convertido para int)
 // Exemplo de Comando:  SET_LED 80
 // Exemplo de Resposta: RES SET_LED 1
-static int usb_send_cmd(char *cmd, int param) {
+static char* usb_send_cmd(char *cmd, int param) {
     int recv_size = 0;                      // Quantidade de caracteres no recv_line
     int ret, actual_size, i;
     int retries = 10;                       // Tenta algumas vezes receber uma resposta da USB. Depois desiste.
     char resp_expected[MAX_RECV_LINE];      // Resposta esperada do comando
     char *resp_pos;                         // Posição na linha lida que contém o número retornado pelo dispositivo
-    long resp_number = -1;                  // Número retornado pelo dispositivo (e.g., valor do led, valor do ldr)
+    //long resp_number = -1;                  // Número retornado pelo dispositivo (e.g., valor do led, valor do ldr)
 
     printk(KERN_INFO "AirQuality: Enviando comando: %s\n", cmd);
 
@@ -102,7 +102,7 @@ static int usb_send_cmd(char *cmd, int param) {
     ret = usb_bulk_msg(airquality_device, usb_sndbulkpipe(airquality_device, usb_out), usb_out_buffer, strlen(usb_out_buffer), &actual_size, 1000*HZ);
     if (ret) {
         printk(KERN_ERR "AirQuality: Erro de codigo %d ao enviar comando!\n", ret);
-        return -1;
+        return "-1";
     }
 
     sprintf(resp_expected, "RES %s", cmd);  // Resposta esperada. Ficará lendo linhas até receber essa resposta.
@@ -129,9 +129,9 @@ static int usb_send_cmd(char *cmd, int param) {
 
                     // Acessa a parte da resposta que contém o número e converte para inteiro
                     resp_pos = &recv_line[strlen(resp_expected) + 1];
-                    ignore = kstrtol(resp_pos, 10, &resp_number);  // AQUI
+                    //ignore = kstrtol(resp_pos, 10, &resp_number);  // AQUI
 
-                    return resp_number;
+                    return resp_pos;
                 }
                 else { // Não é a linha que estávamos esperando. Pega a próxima.
                     printk(KERN_INFO "AirQuality: Nao eh resposta para %s! Tentiva %d. Proxima linha...\n", cmd, retries--);
@@ -144,12 +144,12 @@ static int usb_send_cmd(char *cmd, int param) {
             }
         }
     }
-    return -1; // Não recebi a resposta esperada do dispositivo
+    return "-1"; // Não recebi a resposta esperada do dispositivo
 }
 
 // Executado quando o arquivo /sys/kernel/airquality/{led, ldr, threshold} é lido (e.g., cat /sys/kernel/airquality/led)
 static ssize_t attr_show(struct kobject *sys_obj, struct kobj_attribute *attr, char *buff) {
-    int value;
+    char * value;
     const char *attr_name = attr->attr.name;
 
     printk(KERN_INFO "AirQuality: Lendo %s ...\n", attr_name);
@@ -169,17 +169,18 @@ static ssize_t attr_show(struct kobject *sys_obj, struct kobj_attribute *attr, c
 //else
 //        value = usb_send_cmd("GET_THRESHOLD", -1);
 
-    sprintf(buff, "%d\n", value);                   // Cria a mensagem com o valor do pm25 ou pm10
+    sprintf(buff, "%s\n", value);                   // Cria a mensagem com o valor do pm25 ou pm10
     return strlen(buff);
 }
 
 // Executado quando o arquivo /sys/kernel/airquality/{led, ldr, threshold} é escrito (e.g., echo "100" | sudo tee -a /sys/kernel/airquality/led)
 static ssize_t attr_store(struct kobject *sys_obj, struct kobj_attribute *attr, const char *buff, size_t count) {
-    long ret, value;
+    char* ret, value;
     const char *attr_name = attr->attr.name;
 
-    ret = kstrtol(buff, 10, &value);
-    if (ret) {
+    //ret = kstrtol(buff, 10, &value);
+    
+    if (0) {
         printk(KERN_ALERT "AirQuality: valor de %s invalido.\n", attr_name);
         return -EACCES;
     }
