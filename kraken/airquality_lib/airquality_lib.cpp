@@ -23,15 +23,22 @@ int AirQuality::connect() {
 int AirQuality::readFileValue(string file) {
     int connected = this->connect();
 
+    int pm10, pm25, lpg, co, smoke, tmp, hum;
     if (connected == 2) {                               // Usando valores simulados
         if (file == "pm10")
-            return this->simPM10Value;
-        else if (file == "pm25")
-            return this->simPM25Value;
-        else if (file == "dht")
-            return this->simDHTValue;
-        else if (file == "mq")
-            return this->simMQValue;
+                return pm10;
+            else if (file == "pm25")
+                return pm25;
+            else if (file == "lpg")
+                return lpg;
+            else if (file == "co")
+                return co;
+            else if (file == "smoke")
+                return smoke;
+            else if (file == "tmp")
+                return tmp;
+            else if (file == "hum")
+                return hum;
         else {
             // "ldr" (luminosity): Gera um número aleatório entre 0 e 100
             random_device dev;
@@ -42,14 +49,14 @@ int AirQuality::readFileValue(string file) {
     }
 
     else if (connected == 1) {                          // Conectado. Vamos solicitar o valor ao dispositivo
-        int pm10, pm25, lpg, co, smoke, tmp, hum;
         string filename = string("/sys/kernel/airquality/measures");
-        ifstream file(filename);                        // Abre o arquivo do módulo do kernel
+        ifstream file1(filename);                        // Abre o arquivo do módulo do kernel
 
-        if (file.is_open()) {                           // Verifica se o arquivo foi aberto com sucesso
-            file >> pm10 >> pm25 >> lpg >> co >> smoke >> tmp >> hum;                     // Lê um inteiro do arquivo
-            file.close();
+        if (file1.is_open()) {                           // Verifica se o arquivo foi aberto com sucesso
+            file1 >> pm10 >> pm25 >> lpg >> co >> smoke >> tmp >> hum;                     // Lê um inteiro do arquivo
+            file1.close();
 
+            //converter para float
             if (file == "pm10")
                 return pm10;
             else if (file == "pm25")
