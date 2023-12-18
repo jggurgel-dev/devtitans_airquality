@@ -1,9 +1,9 @@
 AirQualitySensor::AirQualitySensor (int32_t sensorHandle, ISensorsEventCallback* callback)
-  : OnChangeSensor(sensorHandle, callback), mInputReader((size_t)(4)) {
+  : OnChangeSensor(sensorHandle, callback),  {
     mSensorInfo.name = "AirQuality Sensor";
     mSensorInfo.vendor = "devtitans";
     mSensorInfo.type = SensorType::DEVICE_PRIVATE_BASE;
-    mSensorInfo.typeAsString = SENSOR_STRING_TYPE_LIGHT;
+    mSensorInfo.typeAsString = "";
     mSensorInfo.maxRange = 43000.0f;
     mSensorInfo.resolution = 10.0f;
     mSensorInfo.power = 0.001f;         // mA

@@ -231,7 +231,7 @@ ContinuousSensor::ContinuousSensor(int32_t sensorHandle, ISensorsEventCallback* 
 }
 
 AirQualitySensor::AirQualitySensor (int32_t sensorHandle, ISensorsEventCallback* callback)
-  : OnChangeSensor(sensorHandle, callback), mInputReader((size_t)(4)) {
+  : OnChangeSensor(sensorHandle, callback) {
     mSensorInfo.name = "AirQuality Sensor";
     mSensorInfo.vendor = "devtitans";
     mSensorInfo.type = SensorType::DEVICE_PRIVATE_BASE;
@@ -242,28 +242,88 @@ AirQualitySensor::AirQualitySensor (int32_t sensorHandle, ISensorsEventCallback*
     mSensorInfo.minDelay = 200 * 1000;  // microseconds
 }
 
-std::vector AirQualitySensor::readEvents() {
+// std::vector<Event> AirQualitySensor::readEvents() {
+//     //std::ifstream in("/sys/kernel/airquality/measures"); // open sysfs file to read sensor read
+
+//     std::vector<Event> events;
+
+//     Event event_s;
+//     event_s.timestamp = ::android::elapsedRealtimeNano();
+//     event_s.sensorHandle = mSensorInfo.sensorHandle;
+//     event_s.sensorType = mSensorInfo.type;
+
+//     /*
+//     if (in) {
+//         in >> sensorRead; 
+//         in.close();
+//     } 
+//     */
+   
+//     //sensorRead = airLib.getTMP();
+//     //event_s.u.scalar = sensorRead;
+//     //events.push_back(event_s);
+
+//     sensorRead = airLib.getTMP();
+//     event_s.u.vec4.x = airLib.getPM10();
+//     event_s.u.vec4.y = airLib.getPM25();
+//     event_s.u.vec4.z = airLib.getTMP();
+//     event_s.u.vec4.w = airLib.getHUM();
+
+//     events.push_back(event_s);
+
+//     return events;
+// }
+
+std::vector<Event> AirQualitySensor::readEvents() {
     //std::ifstream in("/sys/kernel/airquality/measures"); // open sysfs file to read sensor read
 
+    constexpr static int typeParticles = 0, typeGas = 1, typeTmp = 2;
     std::vector<Event> events;
+    
+    int pm10 = airLib.getPM10(),
+        pm25 = airLib.getPM25(),
+        lpg = airLib.getLPG(),
+        co = airLib.getCO(),
+        smoke = airLib.getSMOKE(),
+        humidity = airLib.getHUM(),
+        temperature = airLib.getTMP();
 
-    Event event_s;
-    event_s.timestamp = ::android::elapsedRealtimeNano();
-    event_s.sensorHandle = mSensorInfo.sensorHandle;
-    event_s.sensorType = mSensorInfo.type;
+    Event eventParticles, eventGas, eventTmp;
 
-    /*
-    if (in) {
-        in >> sensorRead; 
-        in.close();
-    } 
-    */
-    sensorRead = airLib.getTMP();
-    event_s.u.scalar = sensorRead;
-    events.push_back(event_s);
+    // particles
+    eventParticles.timestamp = ::android::elapsedRealtimeNano();
+    eventParticles.sensorHandle = mSensorInfo.sensorHandle;
+    eventParticles.sensorType = mSensorInfo.type;
+    eventParticles.u.vec4.x = typeParticles;
+    eventParticles.u.vec4.y = pm10;
+    eventParticles.u.vec4.z = pm25;
+
+
+    // gas
+    eventGas.timestamp = ::android::elapsedRealtimeNano();
+    eventGas.sensorHandle = mSensorInfo.sensorHandle;
+    eventGas.sensorType = mSensorInfo.type;
+    eventGas.u.vec4.x = typeGas;
+    eventGas.u.vec4.y = lpg;
+    eventGas.u.vec4.z = co;
+    eventGas.u.vec4.w = smoke;
+
+    // tmp
+    eventTmp.timestamp = ::android::elapsedRealtimeNano();
+    eventTmp.sensorHandle = mSensorInfo.sensorHandle;
+    eventTmp.sensorType = mSensorInfo.type;
+    eventTmp.u.vec4.x = typeTmp;
+    eventTmp.u.vec4.y = humidity;
+    eventTmp.u.vec4.z = temperature;
+
+    events.push_back(eventParticles);
+    events.push_back(eventGas);
+    events.push_back(eventTmp);
 
     return events;
 }
+
+
 }  // namespace implementation
 }  // namespace subhal
 }  // namespace V2_1
