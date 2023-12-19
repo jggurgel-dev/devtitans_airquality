@@ -47,6 +47,15 @@ void serial_listener() {
     }
 }
 
+void refresh_measures() {
+    mq2.read(true);
+    lpg = mq2.readLPG();
+    co = mq2.readCO();
+    smoke = mq2.readSmoke();
+    tmp = dht.readTemperature();
+    hum = dht.readHumidity();
+}
+
 void setup() {
     Serial.begin(9600);
     sds.begin(); // this line will begin Serial1 with given baud rate (9600 by default)
@@ -78,8 +87,9 @@ void loop() {
     constexpr uint32_t down_s = 30;
     uint32_t deadline = millis() + down_s * 1000;
     while (static_cast<int32_t>(deadline - millis()) > 0) {
-        serial_listener();
-        delay(1000);
+      serial_listener();
+      refresh_measures();
+      delay(1000);
     }
 
     PmResult pm = sds.queryPm();
@@ -92,13 +102,7 @@ void loop() {
         Serial.println(pm.statusToString());
     }
 
-    /* inserir leitura do dht e mq aqui */
-    mq2.read(true);
-    lpg = mq2.readLPG();
-    co = mq2.readCO();
-    smoke = mq2.readSmoke();
-    tmp = dht.readTemperature();
-    hum = dht.readHumidity();
+    refresh_measures();
     
     WorkingStateResult state = sds.sleep();
     if (state.isWorking()) {
@@ -111,6 +115,9 @@ void loop() {
     deadline = millis() + sleep_s * 1000;
     while (static_cast<int32_t>(deadline - millis()) > 0) {
         serial_listener();
+            /* inserir leitura do dht e mq aqui */
+        mq2.read(true);
+        refresh_measures();
         delay(1000);
     }
 }
